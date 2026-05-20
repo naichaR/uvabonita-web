@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uva Bonita</title>
+<title>Uva Bonita — Versión A (scroll)</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -30,10 +30,18 @@ body {
   font-family: var(--sans);
   font-weight: 300;
   overflow-x: hidden;
-  cursor: none;
+}
+
+/* Cursor custom solo en dispositivos con mouse */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
 }
 
 /* CURSOR */
+.cursor, .cursor-ring { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .cursor, .cursor-ring { display: block; }
+}
 .cursor {
   width: 8px; height: 8px;
   background: var(--terra);
@@ -42,8 +50,9 @@ body {
   top: 0; left: 0;
   pointer-events: none;
   z-index: 9999;
-  transition: transform 0.10s ease;
+  transition: transform 0.15s ease, background 0.3s ease;
   transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
 }
 .cursor-ring {
   width: 28px; height: 28px;
@@ -53,9 +62,10 @@ body {
   top: 0; left: 0;
   pointer-events: none;
   z-index: 9998;
-  transition: transform 0.35s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  transition: transform 0.35s ease, width 0.2s, height 0.2s, opacity 0.2s, border-color 0.3s ease;
   transform: translate(-50%, -50%);
   opacity: 0.5;
+  mix-blend-mode: difference;
 }
 
 /* NAV */
@@ -63,11 +73,18 @@ nav {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 24px 48px;
+  padding: 20px 48px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  mix-blend-mode: multiply;
+  background: rgba(247, 244, 240, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+nav.scrolled {
+  border-bottom-color: var(--paper);
 }
 
 .nav-logo {
@@ -398,13 +415,6 @@ section {
   position: relative;
 }
 
-.portrait-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(0.3) contrast(1.05);
-}
-  
 .about-portrait {
   width: 100%;
   aspect-ratio: 3/4;
@@ -701,14 +711,237 @@ footer .nav-logo { color: var(--off-white); }
   transform: translateY(0);
 }
 
+/* MENU TOGGLE (hamburguesa - solo mobile) */
+.nav-toggle {
+  display: none;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 0;
+}
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--ink);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
 @media(max-width: 768px) {
-  nav { padding: 20px 24px; }
-  .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
-  .hero-illustration { display: none; }
-  section { padding: 80px 24px; }
-  .tastings-grid, .about-grid, .mar-grid { grid-template-columns: 1fr; gap: 48px; }
-  .sus-grid { grid-template-columns: 1fr; }
-  footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+  nav {
+    padding: 16px 24px;
+  }
+  .nav-logo {
+    font-size: 17px;
+  }
+  .nav-toggle {
+    display: flex;
+    position: relative;
+    z-index: 102;
+  }
+  .nav-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(26, 24, 20, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+  }
+  .nav-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-links {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    width: 240px;
+    height: auto;
+    background: var(--off-white);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 20px 24px;
+    border: 1px solid var(--paper);
+    box-shadow: 0 12px 40px rgba(26, 24, 20, 0.12);
+    transform: translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 101;
+  }
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-links li {
+    width: 100%;
+  }
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 12px 0;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    border-bottom: 1px solid var(--paper);
+  }
+  .nav-links li:last-child a {
+    border-bottom: none;
+  }
+
+  /* HERO mobile */
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 100px 24px 60px;
+    min-height: auto;
+  }
+  .hero-text {
+    padding-right: 0;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    margin-bottom: 28px;
+  }
+  .hero-title {
+    font-size: 68px;
+    margin-bottom: 32px;
+  }
+  .hero-body {
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+  .hero-illustration {
+    display: none;
+  }
+  .scroll-hint {
+    padding-top: 40px;
+  }
+
+  /* Secciones mobile */
+  section {
+    padding: 72px 24px;
+  }
+  .section-label {
+    margin-bottom: 36px;
+    font-size: 10px;
+  }
+
+  /* TASTINGS mobile */
+  .tastings-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .tastings-left h2 {
+    font-size: 48px;
+    margin-bottom: 24px;
+  }
+  .tastings-left p {
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+  .tasting-card {
+    padding: 22px 0;
+    gap: 16px;
+  }
+  .tasting-info h3 {
+    font-size: 20px;
+  }
+  .tasting-info p {
+    font-size: 13px;
+  }
+  .tasting-price {
+    font-size: 11px;
+  }
+
+  /* ABOUT mobile */
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .about-right h2 {
+    font-size: 42px;
+  }
+  .about-right p {
+    font-size: 15px;
+  }
+  .about-values {
+    gap: 20px;
+    margin-top: 36px;
+  }
+
+  /* SUSCRIPCIONES mobile */
+  .sus-intro {
+    margin-bottom: 48px;
+  }
+  .sus-intro h2 {
+    font-size: 46px;
+  }
+  .sus-intro p {
+    font-size: 15px;
+  }
+  .sus-grid {
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+  .sus-card {
+    padding: 36px 28px;
+  }
+  .sus-card h3 {
+    font-size: 24px;
+  }
+  .sus-card p {
+    font-size: 14px;
+  }
+
+  /* MARIDAJES mobile */
+  .mar-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .mar-right h2 {
+    font-size: 46px;
+  }
+  .mar-right p {
+    font-size: 15px;
+  }
+  .mar-svg {
+    width: 220px;
+  }
+
+  /* FOOTER CTA mobile */
+  .footer-cta {
+    padding: 72px 24px;
+  }
+  .footer-cta h2 {
+    font-size: 52px;
+  }
+  .footer-cta p {
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+
+  /* FOOTER mobile */
+  footer {
+    padding: 32px 24px;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .divider {
+    margin: 0 24px;
+  }
 }
 </style>
 </head>
@@ -719,13 +952,19 @@ footer .nav-logo { color: var(--off-white); }
 
 <nav>
   <a href="#" class="nav-logo">Uva Bonita</a>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="#tastings">tastings</a></li>
     <li><a href="#about">about</a></li>
     <li><a href="#suscripciones">suscripciones</a></li>
     <li><a href="#maridajes">maridajes</a></li>
   </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 </nav>
+<div class="nav-overlay" id="navOverlay"></div>
 
 <!-- HERO -->
 <section class="hero" id="inicio">
@@ -802,7 +1041,7 @@ footer .nav-logo { color: var(--off-white); }
   <div class="tastings-grid">
     <div class="tastings-left fade-in">
       <h2>catas<br><em>privadas</em></h2>
-      <p>Experiencias íntimas diseñadas para grupos. Cada cata es distinta, cada vino tiene algo que decir. </p>
+      <p>Experiencias íntimas diseñadas para grupos. Cada cata es distinta, cada vino tiene algo que decir. Trabajamos con bodegas boutique que no encontrás en una góndola.</p>
       <a href="#" class="btn btn-fill">reservar</a>
     </div>
     <div class="tastings-cards fade-in" style="transition-delay:0.15s">
@@ -812,7 +1051,7 @@ footer .nav-logo { color: var(--off-white); }
           <h3>Cata íntima</h3>
           <p>4 a 8 personas · 2 horas · 5 vinos seleccionados · tabla</p>
         </div>
-        <span class="tasting-price">consultá valor</span>
+        <span class="tasting-price">desde $XX</span>
       </div>
       <div class="tasting-card">
         <span class="tasting-num">02</span>
@@ -820,7 +1059,7 @@ footer .nav-logo { color: var(--off-white); }
           <h3>Cata completa</h3>
           <p>6 a 16 personas · 3 horas · 7 vinos · maridaje</p>
         </div>
-        <span class="tasting-price">consultá valor</span>
+        <span class="tasting-price">desde $XX</span>
       </div>
       <div class="tasting-card">
         <span class="tasting-num">03</span>
@@ -850,9 +1089,7 @@ footer .nav-logo { color: var(--off-white); }
   <div class="about-grid">
     <div class="about-left fade-in">
       <div class="about-portrait">
-       <div class="about-portrait">
-  <img src="luna.jpg" alt="Luna Zafira, sommelier" class="portrait-img">
-</div>
+        <svg class="portrait-sketch" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
           <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="'Playfair Display', serif" font-size="13" fill="rgba(247,244,240,0.2)" letter-spacing="2">tu foto acá</text>
           <!-- decorative sketch lines -->
           <path d="M60 380 Q150 350 240 380" stroke="rgba(247,244,240,0.08)" stroke-width="1"/>
@@ -863,10 +1100,8 @@ footer .nav-logo { color: var(--off-white); }
     </div>
     <div class="about-right fade-in" style="transition-delay:0.15s">
       <h2>el vino<br>como<br><em>lenguaje.</em></h2>
-      <p>Soy Luna Zafira, sommelier y host de experiencias privadas en Buenos Aires. </p>
-      <p>Uva Bonita es un proyecto de catas privadas, suscripciones y maridajes creado en Buenos Aires.
-Una exploración del vino argentino con enfoque amplio — habla tanto de la copa como del paisaje, los productores y las decisiones que hay detrás de cada botella.
-</p>
+      <p>Soy Luna Zafira, sommelier y host de experiencias privadas en Buenos Aires. Uva Bonita nació de la convicción de que el vino no es un lujo — es una forma de encontrarse.</p>
+      <p>Trabajo con productores pequeños, vinos naturales y biodinámicos de Mendoza, Patagonia y Salta. Cada botella que elijo tiene una historia que vale la pena contar.</p>
       <div class="about-values">
         <div class="about-value">
           <span class="value-num">—</span>
@@ -890,7 +1125,7 @@ Una exploración del vino argentino con enfoque amplio — habla tanto de la cop
   <span class="section-label">suscripciones</span>
   <div class="sus-intro fade-in">
     <h2>vino &<br><em>flores</em><br>cada vez.</h2>
-    <p>Una selección de vino + un arreglo floral armado a mano. Mensual, quincenal o semanal. Para vos o para regalar.</p>
+    <p>Una selección de vino boutique + un arreglo floral armado a mano. Mensual, quincenal o semanal. Para vos o para regalar.</p>
   </div>
 
   <div class="sus-grid">
@@ -907,12 +1142,12 @@ Una exploración del vino argentino con enfoque amplio — habla tanto de la cop
       </div>
       <p>Una botella + arreglo floral de estación. El plan más relajado.</p>
       <ul class="sus-includes">
-        <li>1 vino seleccionado</li>
+        <li>1 vino boutique seleccionado</li>
         <li>1 arreglo floral de estación</li>
         <li>nota del productor</li>
         <li>sugerencia de maridaje</li>
       </ul>
-      <span class="sus-price">$80</span>
+      <span class="sus-price">$XX</span>
       <span class="sus-price-note">por entrega</span>
     </div>
 
@@ -929,12 +1164,12 @@ Una exploración del vino argentino con enfoque amplio — habla tanto de la cop
       </div>
       <p>Dos veces al mes. Para los que quieren más.</p>
       <ul class="sus-includes">
-        <li>1 vino seleccionado</li>
+        <li>1 vino boutique seleccionado</li>
         <li>1 arreglo floral de estación</li>
-        <li>Playlist curada</li>
+        <li>nota del productor</li>
         <li>sugerencia de maridaje</li>
       </ul>
-      <span class="sus-price">$65</span>
+      <span class="sus-price">$XX</span>
       <span class="sus-price-note">por entrega</span>
     </div>
 
@@ -951,12 +1186,12 @@ Una exploración del vino argentino con enfoque amplio — habla tanto de la cop
       </div>
       <p>Cada semana, algo nuevo en tu puerta.</p>
       <ul class="sus-includes">
-        <li>1 vino seleccionado</li>
+        <li>1 vino boutique seleccionado</li>
         <li>1 arreglo floral de estación</li>
-     <li>sugerencia de maridaje</li>
-       <li>Yapa</li>
+        <li>nota del productor</li>
+        <li>sugerencia de maridaje</li>
       </ul>
-      <span class="sus-price">$50</span>
+      <span class="sus-price">$XX</span>
       <span class="sus-price-note">por entrega</span>
     </div>
   </div>
@@ -988,8 +1223,8 @@ Una exploración del vino argentino con enfoque amplio — habla tanto de la cop
       </svg>
     </div>
     <div class="mar-right fade-in" style="transition-delay:0.15s">
-      <h2>acto creativo<br><em>del maridaje</em></h2>
-      <p>Una guía viva de combinaciones entre vinos argentinos y alimento, música y más. En construcción — próximamente acá.</p>
+      <h2>el arte del<br><em>maridaje</em></h2>
+      <p>Una guía viva de combinaciones entre vinos argentinos y alimentos. En construcción — próximamente acá.</p>
       <a href="#" class="btn btn-line">anotarme para el lanzamiento</a>
     </div>
   </div>
@@ -999,22 +1234,60 @@ Una exploración del vino argentino con enfoque amplio — habla tanto de la cop
 <div class="footer-cta">
   <h2>reservá tu<br>experiencia.</h2>
   <p>Escribinos para coordinar una cata, suscribirte o simplemente preguntar.</p>
-  <a href="mailto:hola@uvabonita.com.ar" class="btn btn-fill">uvabonita.morada@gmail.com</a>
+  <a href="mailto:hola@uvabonita.com.ar" class="btn btn-fill">hola@uvabonita.com.ar</a>
 </div>
 
 <footer>
   <span class="nav-logo">Uva Bonita</span>
-  <span class="footer-mono">by Luna Zafira · buenos aires · 2026</span>
+  <span class="footer-mono">by luna zafira · buenos aires · 2025</span>
   <span class="footer-mono">instagram</span>
 </footer>
 
 <script>
-// Cursor
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursorRing');
-document.addEventListener('mousemove', e => {
-  cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
-  ring.style.transform = `translate(${e.clientX - 14}px, ${e.clientY - 14}px)`;
+// Cursor (solo si el dispositivo tiene mouse fino)
+const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if (hasFinePointer) {
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+    ring.style.transform = `translate(${e.clientX - 14}px, ${e.clientY - 14}px)`;
+  });
+}
+
+// Menú hamburguesa
+const toggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+const navOverlay = document.getElementById('navOverlay');
+
+function closeMenu() {
+  toggle.classList.remove('open');
+  navLinks.classList.remove('open');
+  navOverlay.classList.remove('open');
+}
+function openMenu() {
+  toggle.classList.add('open');
+  navLinks.classList.add('open');
+  navOverlay.classList.add('open');
+}
+toggle.addEventListener('click', () => {
+  if (navLinks.classList.contains('open')) closeMenu();
+  else openMenu();
+});
+navOverlay.addEventListener('click', closeMenu);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMenu();
+});
+// Cerrar al clickear un link
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', closeMenu);
+});
+
+// Nav scrolled
+const navEl = document.querySelector('nav');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 20) navEl.classList.add('scrolled');
+  else navEl.classList.remove('scrolled');
 });
 
 // Fade in on scroll
@@ -1022,7 +1295,6 @@ const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-// trigger hero
 setTimeout(() => document.querySelectorAll('.hero .fade-in').forEach(el => el.classList.add('visible')), 100);
 </script>
 </body>
