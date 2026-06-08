@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uva Bonita</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --off-white: #F7F4F0;
+  --paper: #EDEAE4;
+  --terra: #B85C38;
+  --terra-light: #D4724F;
+  --sage: #7A8C6E;
+  --sage-light: #A3B594;
+  --ink: #1A1814;
+  --ink-soft: #3D3A35;
+  --gray: #9A9590;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Playfair Display', serif;
+  --sans: 'Jost', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--off-white);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 300;
+  overflow-x: hidden;
+}
+@media (hover: hover) and (pointer: fine) { body { cursor: none; } }
+.cursor, .cursor-ring { display: none; }
+@media (hover: hover) and (pointer: fine) { .cursor, .cursor-ring { display: block; } }
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--terra);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9999;
+  transition: transform 0.15s ease, background 0.3s ease;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  width: 28px; height: 28px;
+  border: 1px solid var(--terra);
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9998;
+  transition: transform 0.35s ease, width 0.2s, height 0.2s, opacity 0.2s, border-color 0.3s ease;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+  mix-blend-mode: difference;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100; padding: 20px 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(247, 244, 240, 0.92);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+nav.scrolled { border-bottom-color: var(--paper); }
+.nav-logo {
+  font-family: var(--serif); font-size: 15px; font-weight: 400;
+  letter-spacing: 0.04em; color: var(--ink); text-decoration: none;
+}
+.nav-links { display: flex; gap: 40px; list-style: none; }
+.nav-links a {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
+  text-transform: lowercase; color: var(--ink-soft); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--terra); }
+.nav-toggle {
+  display: none; width: 32px; height: 32px;
+  background: transparent; border: none; cursor: pointer;
+  flex-direction: column; justify-content: center; align-items: flex-end;
+  gap: 6px; padding: 0;
+}
+.nav-toggle span {
+  display: block; width: 22px; height: 1.5px;
+  background: var(--ink); transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* BTNS */
+.btn {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
+  text-transform: lowercase; text-decoration: none;
+  padding: 14px 28px; border-radius: 0; transition: all 0.25s; display: inline-block;
+}
+.btn-fill { background: var(--terra); color: var(--off-white); border: 1px solid var(--terra); }
+.btn-fill:hover { background: var(--ink); border-color: var(--ink); }
+.btn-line { border: 1px solid var(--gray); color: var(--ink-soft); }
+.btn-line:hover { border-color: var(--terra); color: var(--terra); }
+/* button reset para Cal.com */
+button.btn { appearance: none; -webkit-appearance: none; cursor: pointer; }
+
+/* HERO */
+.hero {
+  min-height: 100vh; padding: 120px 48px 80px;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto;
+  gap: 0; position: relative;
+}
+.hero-text {
+  grid-column: 1; display: flex; flex-direction: column;
+  justify-content: center; padding-right: 60px;
+}
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  color: var(--gray); margin-bottom: 36px; display: block;
+}
+.hero-title {
+  font-family: var(--serif); font-size: clamp(56px, 7vw, 96px);
+  font-weight: 400; line-height: 0.95; letter-spacing: -0.02em;
+  color: var(--ink); margin-bottom: 40px;
+}
+.hero-title em { font-style: italic; color: var(--terra); }
+.hero-body {
+  font-size: 14px; line-height: 1.85; color: var(--ink-soft);
+  max-width: 360px; margin-bottom: 52px;
+}
+.hero-actions { display: flex; gap: 24px; align-items: center; }
+.hero-illustration {
+  grid-column: 2; display: flex; align-items: center;
+  justify-content: center; position: relative;
+}
+.illus-main { width: 340px; height: 420px; position: relative; }
+.hero-svg { width: 100%; height: 100%; animation: float 6s ease-in-out infinite; }
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+.illus-accent {
+  position: absolute; font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.12em; color: var(--gray);
+}
+.illus-accent-1 { top: 20px; left: -40px; transform: rotate(-90deg); }
+.illus-accent-2 { bottom: 60px; right: -20px; }
+.scroll-hint {
+  grid-column: 1 / -1; display: flex; align-items: center;
+  gap: 16px; padding-top: 60px;
+}
+.scroll-line {
+  width: 40px; height: 1px; background: var(--gray);
+  position: relative; overflow: hidden;
+}
+.scroll-line::after {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%; background: var(--terra);
+  animation: slide 2s ease infinite;
+}
+@keyframes slide { 0% { left: -100%; } 100% { left: 100%; } }
+.scroll-text { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gray); }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--paper); margin: 0 48px; }
+
+/* SECTIONS */
+section { padding: 120px 48px; }
+.section-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em;
+  color: var(--terra); margin-bottom: 56px;
+  display: flex; align-items: center; gap: 16px;
+}
+.section-label::after { content: ''; flex: 0 0 32px; height: 1px; background: var(--terra); }
+
+/* ABOUT */
+#about { background: var(--ink); color: var(--off-white); }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; }
+#about .section-label { color: var(--terra-light); }
+#about .section-label::after { background: var(--terra-light); }
+.about-left { position: relative; }
+.about-portrait {
+  width: 100%; aspect-ratio: 3/4;
+  background: var(--ink-soft); position: relative; overflow: hidden;
+}
+.portrait-sketch { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.about-caption { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: var(--gray); margin-top: 16px; }
+.about-right h2 {
+  font-family: var(--serif); font-size: clamp(36px, 4vw, 54px);
+  font-weight: 400; line-height: 1.1; margin-bottom: 32px; color: var(--off-white);
+}
+.about-right h2 em { font-style: italic; color: var(--terra-light); }
+.about-right p { font-size: 14px; line-height: 1.9; color: rgba(247,244,240,0.6); margin-bottom: 20px; max-width: 440px; }
+.about-values { display: flex; gap: 32px; margin-top: 48px; flex-wrap: wrap; }
+.about-value { display: flex; flex-direction: column; gap: 6px; }
+.value-num { font-family: var(--mono); font-size: 9px; color: var(--terra-light); letter-spacing: 0.1em; }
+.value-label { font-size: 13px; color: rgba(247,244,240,0.7); }
+
+/* FOOTER CTA */
+.footer-cta { background: var(--terra); padding: 100px 48px; text-align: center; }
+.footer-cta h2 {
+  font-family: var(--serif); font-size: clamp(44px, 5.5vw, 72px);
+  font-weight: 400; font-style: italic; color: var(--off-white);
+  margin-bottom: 32px; line-height: 1.05;
+}
+.footer-cta p {
+  font-size: 14px; color: rgba(247,244,240,0.7); margin-bottom: 52px;
+  max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.8;
+}
+.footer-cta .btn-fill { background: var(--off-white); color: var(--terra); border-color: var(--off-white); }
+.footer-cta .btn-fill:hover { background: var(--ink); border-color: var(--ink); color: var(--off-white); }
+
+/* FOOTER */
+footer { background: var(--ink); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; }
+footer .nav-logo { color: var(--off-white); }
+.footer-mono { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: var(--gray); }
+
+/* FADE IN */
+.fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* WHATSAPP */
+.wa-btn {
+  position: fixed; bottom: 28px; right: 28px; z-index: 200;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--terra); display: flex; align-items: center; justify-content: center;
+  text-decoration: none; box-shadow: 0 4px 20px rgba(184,92,56,0.35);
+  opacity: 0; transform: scale(0.8);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+}
+.wa-btn.visible { opacity: 1; transform: scale(1); }
+.wa-btn:hover { background: var(--ink); }
+.wa-btn::before {
+  content: ''; position: absolute; width: 100%; height: 100%;
+  border-radius: 50%; border: 2px solid var(--terra);
+  animation: wa-pulse 2.5s ease-out infinite; z-index: -1;
+}
+.wa-btn:hover::before { border-color: var(--ink); }
+@keyframes wa-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+.wa-btn svg { width: 24px; height: 24px; fill: var(--off-white); }
+
+@media(max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-logo { font-size: 17px; }
+  .nav-toggle { display: flex; position: relative; z-index: 102; }
+  .nav-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(26, 24, 20, 0.35); opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease; z-index: 100;
+  }
+  .nav-overlay.open { opacity: 1; pointer-events: auto; }
+  .nav-links {
+    position: fixed; top: 72px; right: 16px; width: 240px;
+    background: var(--off-white); flex-direction: column; align-items: flex-start;
+    gap: 4px; padding: 20px 24px;
+    border: 1px solid var(--paper); box-shadow: 0 12px 40px rgba(26,24,20,0.12);
+    transform: translateY(-8px); opacity: 0; pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease; z-index: 101;
+  }
+  .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .nav-links li { width: 100%; }
+  .nav-links a { display: block; width: 100%; padding: 12px 0; font-size: 12px; letter-spacing: 0.18em; border-bottom: 1px solid var(--paper); }
+  .nav-links li:last-child a { border-bottom: none; }
+  .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; min-height: auto; }
+  .hero-text { padding-right: 0; }
+  .hero-eyebrow { font-size: 11px; margin-bottom: 28px; }
+  .hero-title { font-size: 68px; margin-bottom: 32px; }
+  .hero-body { font-size: 17px; line-height: 1.7; margin-bottom: 40px; }
+  .hero-illustration { display: none; }
+  .scroll-hint { padding-top: 40px; }
+  section { padding: 72px 24px; }
+  .section-label { margin-bottom: 36px; font-size: 10px; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .about-right h2 { font-size: 42px; }
+  .about-right p { font-size: 17px; line-height: 1.75; }
+  .about-values { gap: 20px; margin-top: 36px; }
+  .footer-cta { padding: 72px 24px; }
+  .footer-cta h2 { font-size: 52px; }
+  .footer-cta p { font-size: 17px; line-height: 1.7; margin-bottom: 40px; }
+  footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+  .divider { margin: 0 24px; }
+  .wa-btn { bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">Uva Bonita</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="tastings.html">tastings</a></li>
+    <li><a href="index.html#about">about</a></li>
+    <li><a href="suscripciones.html">suscripciones</a></li>
+    <li><a href="maridajes.html">maridajes</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-text fade-in">
+    <span class="hero-eyebrow">buenos aires · argentina</span>
+    <h1 class="hero-title">
+      vinos<br>
+      que<br>
+      <em>hablan.</em>
+    </h1>
+    <p class="hero-body">
+
+      Degustaciones, curadorías y suscripciones. 
+      vino + flores y música. by Luna Zafira.
+      
+
+    </p>
+    <div class="hero-actions">
+      <a href="tastings.html" class="btn btn-fill">ver experiencias</a>
+      <a href="#about" class="btn btn-line">about</a>
+    </div>
+  </div>
+
+  <div class="hero-illustration fade-in" style="transition-delay:0.2s">
+    <div class="illus-main">
+    <img src="imagenhero.png" class="hero-svg" alt="Uva Bonita">
+        <path d="M140 320 L140 180 Q140 160 148 148 L152 120 L188 120 L192 148 Q200 160 200 180 L200 320 Q200 336 184 340 L156 340 Q140 336 140 320Z" stroke="#1A1814" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M152 120 L152 96 Q152 88 168 88 Q184 88 184 96 L184 120" stroke="#1A1814" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <rect x="148" y="200" width="44" height="56" rx="1" stroke="#B85C38" stroke-width="1" fill="none"/>
+        <line x1="153" y1="215" x2="187" y2="215" stroke="#B85C38" stroke-width="0.75"/>
+        <line x1="153" y1="222" x2="187" y2="222" stroke="#B85C38" stroke-width="0.75"/>
+        <line x1="153" y1="229" x2="180" y2="229" stroke="#B85C38" stroke-width="0.75"/>
+        <path d="M228 340 L248 340" stroke="#1A1814" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="238" y1="340" x2="238" y2="290" stroke="#1A1814" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M220 290 Q220 260 238 258 Q256 260 256 290 Z" stroke="#1A1814" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M222 282 Q238 286 254 282 Q254 290 238 290 Q222 290 222 282Z" fill="#B85C38" opacity="0.6"/>
+        <circle cx="95" cy="80" r="12" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="115" cy="85" r="10" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="78" cy="92" r="10" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="100" cy="100" r="11" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="120" cy="102" r="9" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="85" cy="112" r="10" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="106" cy="118" r="10" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <circle cx="93" cy="128" r="9" stroke="#1A1814" stroke-width="1.2" fill="none"/>
+        <path d="M100 68 Q100 60 108 52 Q116 46 122 40" stroke="#7A8C6E" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M108 52 Q114 56 116 64" stroke="#7A8C6E" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <circle cx="55" cy="200" r="2" fill="#B85C38" opacity="0.4"/>
+        <circle cx="300" cy="150" r="1.5" fill="#7A8C6E" opacity="0.5"/>
+        <circle cx="280" cy="320" r="2" fill="#B85C38" opacity="0.3"/>
+        <circle cx="40" cy="280" r="1.5" fill="#7A8C6E" opacity="0.4"/>
+        <path d="M260 80 Q270 60 285 58 Q280 72 268 84 Q264 88 260 80Z" stroke="#7A8C6E" stroke-width="1" fill="none"/>
+        <path d="M268 84 Q272 76 285 58" stroke="#7A8C6E" stroke-width="0.75" stroke-dasharray="2,2"/>
+      </svg>
+      <span class="illus-accent illus-accent-1">identidad · interpretación</span>
+      <span class="illus-accent illus-accent-2">proyectos · territorio</span>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">scroll</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <span class="section-label">about</span>
+  <div class="about-grid">
+    <div class="about-left fade-in">
+      <div class="about-portrait">
+        <svg class="portrait-sketch" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="'Playfair Display', serif" font-size="13" fill="rgba(247,244,240,0.2)" letter-spacing="2">tu foto acá</text>
+          <path d="M60 380 Q150 350 240 380" stroke="rgba(247,244,240,0.08)" stroke-width="1"/>
+          <circle cx="150" cy="140" r="60" stroke="rgba(184,92,56,0.15)" stroke-width="1" fill="none"/>
+        </svg>
+      </div>
+      <p class="about-caption">Luna Zafira · sommelier · buenos aires</p>
+    </div>
+    <div class="about-right fade-in" style="transition-delay:0.15s">
+      <h2>el vino<br>como<br><em>lenguaje.</em></h2>
+      <p>Soy Luna Zafira, sommelier y host de experiencias privadas en Buenos Aires.</p>
+      <p>Mis degustaciones llevan a la gente al paisaje. A pensar en el trabajo
+detrás de lo que tienen en la copa. Mendoza, Patagonia, el NOA, Buenos Aires, Córdoba —
+Argentina tiene una diversidad de territorio del que aún seguimos conociendo.
+      </p>
+      <div class="about-values">
+        <div class="about-value">
+          <span class="value-num">—</span>
+          <span class="value-label">vinos con personalidad</span>
+        </div>
+        <div class="about-value">
+          <span class="value-num">—</span>
+          <span class="value-label">interpretación</span>
+        </div>
+        <div class="about-value">
+          <span class="value-num">—</span>
+          <span class="value-label">experiencias accesibles</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<div class="footer-cta">
+  <h2>reservá tu<br>experiencia.</h2>
+  <p>Elegí fecha y horario directamente. En menos de un minuto.</p>
+  <button
+    data-cal-namespace="tasting-intima"
+    data-cal-link="luna-zafira-tmozqp/tasting-intima"
+    data-cal-config='{"layout":"month_view"}'
+    class="btn btn-fill">
+    reservar
+  </button>
+</div>
+
+<footer>
+  <span class="nav-logo">Uva Bonita</span>
+  <span class="footer-mono">by luna zafira · buenos aires · 2025</span>
+  <span class="footer-mono">instagram</span>
+</footer>
+
+<!-- WhatsApp -->
+<a class="wa-btn" id="waBtn" href="https://wa.me/5491158481748?text=Hola!%20Vi%20la%20web%20de%20Uva%20Bonita%20y%20quiero%20saber%20m%C3%A1s." target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if (hasFinePointer) {
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+    ring.style.transform = `translate(${e.clientX - 14}px, ${e.clientY - 14}px)`;
+  });
+}
+const toggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+const navOverlay = document.getElementById('navOverlay');
+function closeMenu() { toggle.classList.remove('open'); navLinks.classList.remove('open'); navOverlay.classList.remove('open'); }
+function openMenu() { toggle.classList.add('open'); navLinks.classList.add('open'); navOverlay.classList.add('open'); }
+toggle.addEventListener('click', () => { if (navLinks.classList.contains('open')) closeMenu(); else openMenu(); });
+navOverlay.addEventListener('click', closeMenu);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+const navEl = document.querySelector('nav');
+window.addEventListener('scroll', () => { navEl.classList.toggle('scrolled', window.scrollY > 20); });
+const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+setTimeout(() => document.querySelectorAll('.hero .fade-in').forEach(el => el.classList.add('visible')), 100);
+const waBtn = document.getElementById('waBtn');
+function checkScroll() { waBtn.classList.toggle('visible', window.scrollY > 300); }
+window.addEventListener('scroll', checkScroll);
+checkScroll();
+</script>
+<!-- Cal.com embed -->
+<script>
+(function (C, A, L) {
+  let p = function (a, ar) { a.q.push(ar); };
+  let d = C.document;
+  C.Cal = C.Cal || function () {
+    let cal = C.Cal; let ar = arguments;
+    if (!cal.loaded) {
+      cal.ns = {}; cal.q = cal.q || [];
+      d.head.appendChild(d.createElement("script")).src = A;
+      cal.loaded = true;
+    }
+    if (ar[0] === L) {
+      const api = function () { p(api, arguments); };
+      const namespace = ar[1];
+      api.q = api.q || [];
+      if (typeof namespace === "string") {
+        cal.ns[namespace] = cal.ns[namespace] || api;
+        p(cal.ns[namespace], ar);
+        p(cal, ["-", api]);
+      } else p(cal, ar);
+      return;
+    }
+    p(cal, ar);
+  };
+})(window, "https://app.cal.com/embed/embed.js", "init");
+
+Cal("init", "tasting-intima", { origin: "https://cal.com" });
+Cal.ns["tasting-intima"]("ui", {
+  "hideEventTypeDetails": false,
+  "layout": "month_view",
+  "cssVarsPerTheme": {
+    "light": {
+      "--cal-brand": "#B85C38",
+      "--cal-brand-emphasis": "#1A1814",
+      "--cal-brand-text": "#F7F4F0"
+    }
+  }
+});
+</script>
+
+</body>
+</html>

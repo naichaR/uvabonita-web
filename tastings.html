@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tastings — Uva Bonita</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --off-white: #F7F4F0;
+  --paper: #EDEAE4;
+  --terra: #B85C38;
+  --terra-light: #D4724F;
+  --sage: #7A8C6E;
+  --ink: #1A1814;
+  --ink-soft: #3D3A35;
+  --gray: #9A9590;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Playfair Display', serif;
+  --sans: 'Jost', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--off-white); color: var(--ink); font-family: var(--sans); font-weight: 300; overflow-x: hidden; }
+@media (hover: hover) and (pointer: fine) { body { cursor: none; } }
+.cursor, .cursor-ring { display: none; }
+@media (hover: hover) and (pointer: fine) { .cursor, .cursor-ring { display: block; } }
+.cursor {
+  width: 8px; height: 8px; background: var(--terra); border-radius: 50%;
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+  transition: transform 0.15s ease; transform: translate(-50%, -50%); mix-blend-mode: difference;
+}
+.cursor-ring {
+  width: 28px; height: 28px; border: 1px solid var(--terra); border-radius: 50%;
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998;
+  transition: transform 0.35s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  transform: translate(-50%, -50%); opacity: 0.5; mix-blend-mode: difference;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(247, 244, 240, 0.92); backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color 0.3s ease;
+}
+nav.scrolled { border-bottom-color: var(--paper); }
+.nav-logo { font-family: var(--serif); font-size: 15px; font-weight: 400; letter-spacing: 0.04em; color: var(--ink); text-decoration: none; }
+.nav-links { display: flex; gap: 40px; list-style: none; }
+.nav-links a { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: lowercase; color: var(--ink-soft); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--terra); }
+.nav-toggle { display: none; width: 32px; height: 32px; background: transparent; border: none; cursor: pointer; flex-direction: column; justify-content: center; align-items: flex-end; gap: 6px; padding: 0; }
+.nav-toggle span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: transform 0.3s ease, opacity 0.3s ease; }
+.nav-toggle.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* BTNS */
+.btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: lowercase; text-decoration: none; padding: 14px 28px; border-radius: 0; transition: all 0.25s; display: inline-block; }
+.btn-fill { background: var(--terra); color: var(--off-white); border: 1px solid var(--terra); }
+.btn-fill:hover { background: var(--ink); border-color: var(--ink); }
+.btn-line { border: 1px solid var(--gray); color: var(--ink-soft); }
+.btn-line:hover { border-color: var(--terra); color: var(--terra); }
+/* button reset para Cal.com */
+button.btn { appearance: none; -webkit-appearance: none; cursor: pointer; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--paper); margin: 0 48px; }
+
+/* SECTION */
+section { padding: 120px 48px; }
+.section-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em; color: var(--terra); margin-bottom: 56px; display: flex; align-items: center; gap: 16px; }
+.section-label::after { content: ''; flex: 0 0 32px; height: 1px; background: var(--terra); }
+
+/* PAGE HEADER */
+.page-header {
+  padding: 160px 48px 80px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: end;
+}
+.page-header-left h1 {
+  font-family: var(--serif); font-size: clamp(56px, 7vw, 96px);
+  font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: var(--ink);
+}
+.page-header-left h1 em { font-style: italic; color: var(--terra); }
+.page-header-eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  color: var(--gray); margin-bottom: 32px; display: block;
+}
+.page-header-right p {
+  font-size: 14px; line-height: 1.9; color: var(--ink-soft); max-width: 400px;
+}
+
+/* TASTINGS */
+.tastings-cards {
+  display: flex; flex-direction: column; gap: 2px; margin-bottom: 80px;
+}
+.tasting-card {
+  border-top: 1px solid var(--paper); padding: 28px 0;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 24px;
+  align-items: start; cursor: pointer; transition: all 0.25s; position: relative;
+}
+.tasting-card::after {
+  content: ''; position: absolute; left: 0; bottom: 0;
+  width: 0; height: 1px; background: var(--terra); transition: width 0.3s;
+}
+.tasting-card:hover::after { width: 100%; }
+.tasting-num { font-family: var(--mono); font-size: 10px; color: var(--gray); padding-top: 3px; }
+.tasting-info h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 6px; transition: color 0.2s; }
+.tasting-card:hover .tasting-info h3 { color: var(--terra); }
+.tasting-info p { font-size: 12px; color: var(--gray); line-height: 1.6; }
+.tasting-price { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); white-space: nowrap; padding-top: 3px; }
+
+/* DETAIL BLOCKS */
+.detail-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  margin-top: 80px;
+}
+.detail-block {
+  background: var(--paper); padding: 40px 36px;
+}
+.detail-block-num { font-family: var(--mono); font-size: 9px; color: var(--terra); letter-spacing: 0.15em; margin-bottom: 20px; display: block; }
+.detail-block h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 12px; }
+.detail-block p { font-size: 13px; line-height: 1.75; color: var(--ink-soft); }
+
+/* CTA BAND */
+.cta-band {
+  background: var(--ink); padding: 80px 48px;
+  display: grid; grid-template-columns: 1fr auto; gap: 80px; align-items: center;
+}
+.cta-band h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; font-style: italic; color: var(--off-white); }
+.cta-band .btn-fill { background: var(--terra); border-color: var(--terra); color: var(--off-white); }
+.cta-band .btn-fill:hover { background: var(--off-white); border-color: var(--off-white); color: var(--ink); }
+
+/* FOOTER CTA */
+.footer-cta { background: var(--terra); padding: 100px 48px; text-align: center; }
+.footer-cta h2 { font-family: var(--serif); font-size: clamp(44px, 5.5vw, 72px); font-weight: 400; font-style: italic; color: var(--off-white); margin-bottom: 32px; line-height: 1.05; }
+.footer-cta p { font-size: 14px; color: rgba(247,244,240,0.7); margin-bottom: 52px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.8; }
+.footer-cta .btn-fill { background: var(--off-white); color: var(--terra); border-color: var(--off-white); }
+.footer-cta .btn-fill:hover { background: var(--ink); border-color: var(--ink); color: var(--off-white); }
+footer { background: var(--ink); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; }
+footer .nav-logo { color: var(--off-white); }
+.footer-mono { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: var(--gray); }
+
+/* FADE IN */
+.fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* WHATSAPP */
+.wa-btn {
+  position: fixed; bottom: 28px; right: 28px; z-index: 200;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--terra); display: flex; align-items: center; justify-content: center;
+  text-decoration: none; box-shadow: 0 4px 20px rgba(184,92,56,0.35);
+  opacity: 0; transform: scale(0.8); transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+}
+.wa-btn.visible { opacity: 1; transform: scale(1); }
+.wa-btn:hover { background: var(--ink); }
+.wa-btn::before {
+  content: ''; position: absolute; width: 100%; height: 100%;
+  border-radius: 50%; border: 2px solid var(--terra); animation: wa-pulse 2.5s ease-out infinite; z-index: -1;
+}
+@keyframes wa-pulse { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.7); opacity: 0; } }
+.wa-btn svg { width: 24px; height: 24px; fill: var(--off-white); }
+
+@media(max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-logo { font-size: 17px; }
+  .nav-toggle { display: flex; position: relative; z-index: 102; }
+  .nav-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26, 24, 20, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 100; }
+  .nav-overlay.open { opacity: 1; pointer-events: auto; }
+  .nav-links { position: fixed; top: 72px; right: 16px; width: 240px; background: var(--off-white); flex-direction: column; align-items: flex-start; gap: 4px; padding: 20px 24px; border: 1px solid var(--paper); box-shadow: 0 12px 40px rgba(26,24,20,0.12); transform: translateY(-8px); opacity: 0; pointer-events: none; transition: transform 0.25s ease, opacity 0.25s ease; z-index: 101; }
+  .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .nav-links li { width: 100%; }
+  .nav-links a { display: block; width: 100%; padding: 12px 0; font-size: 12px; letter-spacing: 0.18em; border-bottom: 1px solid var(--paper); }
+  .nav-links li:last-child a { border-bottom: none; }
+  .page-header { grid-template-columns: 1fr; padding: 120px 24px 60px; gap: 32px; }
+  .page-header-left h1 { font-size: 64px; }
+  .page-header-right p { font-size: 17px; line-height: 1.75; }
+  section { padding: 72px 24px; }
+  .section-label { margin-bottom: 36px; }
+  .tasting-info p { font-size: 15px; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-block p { font-size: 15px; line-height: 1.7; }
+  .cta-band { grid-template-columns: 1fr; gap: 32px; padding: 60px 24px; }
+  .footer-cta { padding: 72px 24px; }
+  .footer-cta h2 { font-size: 52px; }
+  .footer-cta p { font-size: 17px; line-height: 1.7; margin-bottom: 40px; }
+  footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+  .divider { margin: 0 24px; }
+  .wa-btn { bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">Uva Bonita</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="tastings.html" class="active">tastings</a></li>
+    <li><a href="index.html#about">about</a></li>
+    <li><a href="suscripciones.html">suscripciones</a></li>
+    <li><a href="maridajes.html">maridajes</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-left fade-in">
+    <span class="page-header-eyebrow">buenos aires · argentina</span>
+    <h1>catas<br><em>privadas</em></h1>
+  </div>
+  <div class="page-header-right fade-in" style="transition-delay:0.15s">
+    <p>Experiencias íntimas diseñadas para grupos. Cada cata es distinta, cada vino tiene algo que decir.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- TASTINGS -->
+<section id="tastings">
+  <span class="section-label">experiencias</span>
+
+  <div class="tastings-cards fade-in">
+    <div class="tasting-card">
+      <span class="tasting-num">01</span>
+      <div class="tasting-info">
+        <h3>Cata íntima</h3>
+        <p>4 a 6 personas · 2 horas · 5 vinos seleccionados · tabla</p>
+      </div>
+      <span class="tasting-price">consultar $</span>
+    </div>
+    <div class="tasting-card">
+      <span class="tasting-num">02</span>
+      <div class="tasting-info">
+        <h3>Cata completa</h3>
+        <p>hasta 16 personas · 3 horas · 7 vinos · maridaje</p>
+      </div>
+      <span class="tasting-price">consultar $</span>
+    </div>
+    <div class="tasting-card">
+      <span class="tasting-num">03</span>
+      <div class="tasting-info">
+        <h3>A domicilio</h3>
+        <p>10 a 20 personas · en tu espacio · todo incluido</p>
+      </div>
+      <span class="tasting-price">consultar $</span>
+    </div>
+    <div class="tasting-card">
+      <span class="tasting-num">04</span>
+      <div class="tasting-info">
+        <h3>Corporativo</h3>
+        <p>Team building · agasajo · cierre de año · +15 personas</p>
+      </div>
+      <span class="tasting-price">cotizar</span>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="detail-block fade-in">
+      <span class="detail-block-num">01 — vinos</span>
+      <h3>Selección curada</h3>
+      <p>Cada cata usa vinos de productores pequeños que no encontrás en una góndola. Bodegas boutique de Mendoza, Patagonia, el NOA, Córdoba y Buenos Aires.</p>
+    </div>
+    <div class="detail-block fade-in" style="transition-delay:0.1s">
+      <span class="detail-block-num">02 — lugar</span>
+      <h3>En tu espacio o el nuestro</h3>
+      <p>Las catas pueden hacerse en nuestra locación en Buenos Aires o en el lugar que elijas. Llevamos todo lo necesario.</p>
+    </div>
+    <div class="detail-block fade-in" style="transition-delay:0.2s">
+      <span class="detail-block-num">03 — reserva</span>
+      <h3>Cómo coordinar</h3>
+      <p>Escribinos por WhatsApp o mail para coordinar fechas, cantidad de personas y preferencias. Confirmamos con anticipación y armamos la experiencia a medida.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band fade-in">
+  <h2>¿Querés reservar<br>tu cata?</h2>
+  <button
+    data-cal-namespace="tasting-intima"
+    data-cal-link="luna-zafira-tmozqp/tasting-intima"
+    data-cal-config='{"layout":"month_view"}'
+    class="btn btn-fill">
+    reservar
+  </button>
+</div>
+
+<!-- FOOTER CTA -->
+<div class="footer-cta">
+  <h2>reservá tu<br>experiencia.</h2>
+  <p>Elegí fecha y horario directamente. En menos de un minuto.</p>
+  <button
+    data-cal-namespace="tasting-intima"
+    data-cal-link="luna-zafira-tmozqp/tasting-intima"
+    data-cal-config='{"layout":"month_view"}'
+    class="btn btn-fill">
+    reservar
+  </button>
+</div>
+
+<footer>
+  <span class="nav-logo">Uva Bonita</span>
+  <span class="footer-mono">by luna zafira · buenos aires · 2025</span>
+  <span class="footer-mono">instagram</span>
+</footer>
+
+<!-- WhatsApp -->
+<a class="wa-btn" id="waBtn" href="https://wa.me/5491158481748?text=Hola!%20Vi%20la%20web%20de%20Uva%20Bonita%20y%20quiero%20saber%20m%C3%A1s." target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+if (hasFinePointer) {
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+    ring.style.transform = `translate(${e.clientX - 14}px, ${e.clientY - 14}px)`;
+  });
+}
+const toggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+const navOverlay = document.getElementById('navOverlay');
+function closeMenu() { toggle.classList.remove('open'); navLinks.classList.remove('open'); navOverlay.classList.remove('open'); }
+function openMenu() { toggle.classList.add('open'); navLinks.classList.add('open'); navOverlay.classList.add('open'); }
+toggle.addEventListener('click', () => { if (navLinks.classList.contains('open')) closeMenu(); else openMenu(); });
+navOverlay.addEventListener('click', closeMenu);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+const navEl = document.querySelector('nav');
+window.addEventListener('scroll', () => { navEl.classList.toggle('scrolled', window.scrollY > 20); });
+const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+setTimeout(() => document.querySelectorAll('.page-header .fade-in').forEach(el => el.classList.add('visible')), 100);
+const waBtn = document.getElementById('waBtn');
+function checkScroll() { waBtn.classList.toggle('visible', window.scrollY > 300); }
+window.addEventListener('scroll', checkScroll);
+checkScroll();
+</script>
+
+<!-- Cal.com embed -->
+<script>
+(function (C, A, L) {
+  let p = function (a, ar) { a.q.push(ar); };
+  let d = C.document;
+  C.Cal = C.Cal || function () {
+    let cal = C.Cal; let ar = arguments;
+    if (!cal.loaded) {
+      cal.ns = {}; cal.q = cal.q || [];
+      d.head.appendChild(d.createElement("script")).src = A;
+      cal.loaded = true;
+    }
+    if (ar[0] === L) {
+      const api = function () { p(api, arguments); };
+      const namespace = ar[1];
+      api.q = api.q || [];
+      if (typeof namespace === "string") {
+        cal.ns[namespace] = cal.ns[namespace] || api;
+        p(cal.ns[namespace], ar);
+        p(cal, ["-", api]);
+      } else p(cal, ar);
+      return;
+    }
+    p(cal, ar);
+  };
+})(window, "https://app.cal.com/embed/embed.js", "init");
+
+Cal("init", "tasting-intima", { origin: "https://cal.com" });
+Cal.ns["tasting-intima"]("ui", {
+  "hideEventTypeDetails": false,
+  "layout": "month_view",
+  "cssVarsPerTheme": {
+    "light": {
+      "--cal-brand": "#B85C38",
+      "--cal-brand-emphasis": "#1A1814",
+      "--cal-brand-text": "#F7F4F0"
+    }
+  }
+});
+</script>
+
+</body>
+</html>
